@@ -26,24 +26,28 @@ package object Circuitos {
         val cout = logicOr(List(secondHaResult.head, firstHaResult.head))
         List(cout.head, secondHaResult.tail.head)
     }
-  
+
   def adder(n: Int): Chip = {
-    def recursionFunc(list1: List[Int], list2: List[Int], n: Int, carry: Int, acc: List[Int] = Nil): List[Int] = {
-      if (n > 0) {
-        val fullAdder = full_adder
-        val newAdder = fullAdder(List(list1(n - 1), list2(n - 1), carry))
-        recursionFunc(list1, list2, n - 1, newAdder.head, newAdder.tail.head :: acc)
-      } else {
-        carry :: acc
-      }
-    }
     // Devuelve un Chip que recibe una lista de 2n bits de entrada (los primeros n bits corresponden
     // al primer número a sumar y los segundos n bits corresponden al segundo número a sumar)
     // y devuelve n+1 bits de salida, donde el primero es el acarreo de la suma y los otros n
     // corresponden a los n bits de salida
-    (entry_list: List[Int]) =>
-      val a = entry_list.take(n)
-      val b = entry_list.drop(n)
-      recursionFunc(a,b,n,0)
+    def aux(bitsNumero1: List[Int], bitsNumero2: List[Int], digitoActual: Int, acarreo: Int,
+            resultado: List[Int]): List[Int] = {
+      if (digitoActual == -1)
+        acarreo :: resultado
+      else {
+        val resultadoSuma = full_adder(List(bitsNumero1(digitoActual), bitsNumero2(digitoActual), acarreo))
+        val nuevoAcarreo = resultadoSuma.head
+        val suma = resultadoSuma.tail.head
+        aux(bitsNumero1, bitsNumero2, digitoActual - 1, nuevoAcarreo, suma :: resultado)
+      }
+    }
+
+    (lista: List[Int]) => {
+      val numero1 = lista.take(n)
+      val numero2 = lista.drop(n)
+      aux(numero1, numero2, n - 1, 0, Nil)
+    }
   }
 }
